@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw
+    database: agro_db
+    schema: public
+    description: "Dados brutos ingeridos pelo Python diretamente da fonte"
+    tables:
+      - name: raw_precos
+        description: "Tabela crua contendo preços simulados de Soja e Milho"

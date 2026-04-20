@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agro_postgres
+    environment:
+      POSTGRES_USER: agro_user
+      POSTGRES_PASSWORD: agro_password
+      POSTGRES_DB: agro_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: agro_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@agro.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  dbt:
+    build:
+      context: .
+      dockerfile: ./dbt/Dockerfile
+    container_name: agro_dbt
+    volumes:
+      - ./dbt:/usr/app
+      - ./data:/data
+    depends_on:
+      - postgres
+    profiles: ["dbt"]
+
+  streamlit:
+    build: ./dashboard
+    container_name: agro_streamlit
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./dashboard:/app
+    depends_on:
+      - postgres
+    profiles: ["streamlit"]
+
+volumes:
+  postgres_data:

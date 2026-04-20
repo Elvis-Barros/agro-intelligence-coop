@@ -1,0 +1,20 @@
+FROM python:3.11-slim
+
+WORKDIR /usr/app
+
+# Instala dependências do sistema (importante para dbt)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copia e instala requirements
+COPY dbt/requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Copia o projeto dbt
+COPY dbt/ .
+
+CMD ["dbt", "--version"]

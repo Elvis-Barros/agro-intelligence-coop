@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+ENV/
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+
+# Docker & Ambientes
+.env
+
+# Sistemas operacionais (lixo do Windows/Mac)
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code ( configurações pessoais tuas, não do projeto)
+.vscode/

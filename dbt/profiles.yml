@@ -1,0 +1,12 @@
+agro_intelligence_coop:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: postgres
+      user: agro_user
+      password: agro_password
+      port: 5432
+      dbname: agro_db
+      schema: dev
+      threads: 4
