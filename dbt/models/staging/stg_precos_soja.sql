@@ -1,42 +1,40 @@
 {{ config(materialized='view') }}
 
--- Mapeamento da tabela crua (Raw) para o Staging de Negócio
 SELECT 
     data_registro as data,
+    regiao,
     preco_saca_rs as preco_saca_soja,
-    
-    -- CAMPOS SIMULADOS: Como a nossa API real ainda não foi conectada, 
-    -- usamos NULL para o preço futuro e simulamos a região 'GO'. 
-    -- TODO: Substituir por dados reais da API da B3/CBOT no futuro.
     NULL::numeric as preco_futuro_cbot, 
-    'GO' as regiao,
     
     (preco_saca_rs - COALESCE(NULL, 0)) as premio_regiao,
     
-    -- Custo variável por região
+    -- Custo fixo estimado por saca (não acompanha a bolsa de valores)
     CASE 
-        WHEN 'GO' IN ('MT', 'MS') THEN ROUND( (preco_saca_rs * 0.58)::numeric , 2)
-        WHEN 'GO' = 'GO' THEN ROUND( (preco_saca_rs * 0.62)::numeric , 2)
-        ELSE ROUND( (preco_saca_rs * 0.65)::numeric , 2)
+        WHEN regiao = 'MT' THEN 55.00
+        WHEN regiao = 'MS' THEN 58.00
+        WHEN regiao = 'GO' THEN 62.00
+        ELSE 65.00
     END as custo_estimado_producao,
 
-    -- Margem bruta
+    -- Margem bruta absoluta (Reais por saca)
     ROUND( (preco_saca_rs - 
         CASE 
-            WHEN 'GO' IN ('MT', 'MS') THEN preco_saca_rs * 0.58
-            WHEN 'GO' = 'GO' THEN preco_saca_rs * 0.62
-            ELSE preco_saca_rs * 0.65 
+            WHEN regiao = 'MT' THEN 55.00
+            WHEN regiao = 'MS' THEN 58.00
+            WHEN regiao = 'GO' THEN 62.00
+            ELSE 65.00 
         END)::numeric , 2) as margem_bruta_estimada,
 
-    -- Margem percentual
+    -- Margem bruta percentual (Agora sim, vai flutuar feio quando o preço cair!)
     ROUND( 
         ((preco_saca_rs - 
             CASE 
-                WHEN 'GO' IN ('MT', 'MS') THEN preco_saca_rs * 0.58
-                WHEN 'GO' = 'GO' THEN preco_saca_rs * 0.62
-                ELSE preco_saca_rs * 0.65 
+                WHEN regiao = 'MT' THEN 55.00
+                WHEN regiao = 'MS' THEN 58.00
+                WHEN regiao = 'GO' THEN 62.00
+                ELSE 65.00 
             END) / preco_saca_rs * 100)::numeric , 2
     ) as margem_bruta_percentual
 
 FROM {{ source('raw', 'raw_precos') }}
-WHERE produto = 'Soja' -- Filtra apenas os registros de soja da tabela crua
+WHERE produto = 'Soja'

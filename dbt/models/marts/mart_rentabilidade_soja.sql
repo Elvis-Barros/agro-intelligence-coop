@@ -1,60 +1,26 @@
 {{ config(materialized='table') }}
 
--- Soja
 SELECT 
-    'Soja' as commodity,
-    data,
+    data AS data,
+    'Soja' AS commodity,
     regiao,
-    preco_saca_soja as preco_saca,
-    preco_futuro_cbot,
-    premio_regiao,
-    custo_estimado_producao,
-    margem_bruta_estimada,
+    preco_saca_soja AS preco_saca,
     margem_bruta_percentual,
 
+    -- CRIANDO A COLUNA: Nível de Rentabilidade
     CASE 
-        WHEN margem_bruta_percentual >= 45 THEN 'Excelente'
-        WHEN margem_bruta_percentual >= 35 THEN 'Boa'
-        WHEN margem_bruta_percentual >= 25 THEN 'Média'
-        ELSE 'Baixa / Alto Risco'
-    END as nivel_rentabilidade,
+        WHEN margem_bruta_percentual > 30 THEN 'Alta Rentabilidade'
+        WHEN margem_bruta_percentual BETWEEN 10 AND 30 THEN 'Rentabilidade Média'
+        WHEN margem_bruta_percentual BETWEEN 0 AND 10 THEN 'Margem Apertada'
+        ELSE 'PREJUÍZO'
+    END AS nivel_rentabilidade,
 
+    -- CRIANDO A COLUNA: Recomendação
     CASE 
-        WHEN premio_regiao > 10 THEN 'Vender agora (ótimo prêmio)'
-        WHEN preco_saca_soja > 200 THEN 'Vender agora (preço alto)'
-        WHEN margem_bruta_percentual < 30 THEN 'Aguardar ou fazer hedge'
-        ELSE 'Monitorar'
-    END as recomendacao_venda
+        WHEN margem_bruta_percentual > 40 THEN 'Vender agora (Margem excepcional)'
+        WHEN margem_bruta_percentual BETWEEN 25 AND 40 THEN 'Aguardar pico de preço'
+        WHEN margem_bruta_percentual BETWEEN 10 AND 25 THEN 'Hedging (Proteger preço)'
+        ELSE 'NÃO VENDER (Abaixo do custo)'
+    END AS recomendacao_venda
 
 FROM {{ ref('stg_precos_soja') }}
-
-UNION ALL
-
--- Milho
-SELECT 
-    'Milho' as commodity,
-    data,
-    regiao,
-    preco_saca_milho as preco_saca,
-    preco_futuro_cbot,
-    premio_regiao,
-    custo_estimado_producao,
-    margem_bruta_estimada,
-    margem_bruta_percentual,
-
-    CASE 
-        WHEN margem_bruta_percentual >= 45 THEN 'Excelente'
-        WHEN margem_bruta_percentual >= 35 THEN 'Boa'
-        WHEN margem_bruta_percentual >= 25 THEN 'Média'
-        ELSE 'Baixa / Alto Risco'
-    END as nivel_rentabilidade,
-
-    CASE 
-        WHEN premio_regiao > 8 THEN 'Vender agora (ótimo prêmio)'
-        WHEN preco_saca_milho > 95 THEN 'Vender agora (preço alto)'
-        WHEN margem_bruta_percentual < 30 THEN 'Aguardar ou fazer hedge'
-        ELSE 'Monitorar'
-    END as recomendacao_venda
-
-FROM {{ ref('stg_precos_milho') }}
-ORDER BY data DESC, commodity
