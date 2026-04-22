@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta
 import random
 
-DATABASE_URL = "postgresql://agro_user:agro_password@localhost:5433/agro_db"
+DATABASE_URL = "postgresql://agro_user:agro_password@13.222.170.228:5432/agro_db"
 engine = create_engine(DATABASE_URL)
 
 print("Conectado ao banco PostgreSQL com sucesso!")

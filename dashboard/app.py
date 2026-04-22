@@ -9,7 +9,7 @@ st.title("🌱 Commercial Intelligence & Risk Platform")
 st.markdown("### Plataforma de Inteligência Comercial para Cooperativas e Distribuidoras de Insumos")
 
 # Conexão
-engine = create_engine("postgresql://agro_user:agro_password@postgres:5432/agro_db")
+engine = create_engine("postgresql://agro_user:agro_password@13.222.170.228:5432/agro_db")
 
 # Carrega os dados
 df = pd.read_sql("""

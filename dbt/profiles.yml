@@ -3,7 +3,7 @@ agro_intelligence_coop:
   outputs:
     dev:
       type: postgres
-      host: postgres
+      host: 13.222.170.228
       user: agro_user
       password: agro_password
       port: 5432
